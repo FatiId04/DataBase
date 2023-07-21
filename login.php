@@ -4,11 +4,11 @@ require "connection.php";
 $identifiant = $_GET['identifiant'];
 $password = $_GET['password'];
 
-if (isset($_GET['identifiant']) ) {
+if (isset($_GET['identifiant']) && isset($_GET['password'])) {
     $mysqli_query = "SELECT * FROM users WHERE identifiant=? AND password=?";
     $stmt = $conn->prepare($mysqli_query);
     $stmt->bind_param("ss", $identifiant, $password);
-    if (isset($_GET['identifiant']) && isset($_GET['password'])) {
+
     if ($stmt->execute()) {
         $result = $stmt->get_result();
 
@@ -28,8 +28,12 @@ if (isset($_GET['identifiant']) ) {
         $response['error'] = "401";
         $response['message'] = "utilisateur introuvable";
     }
+} else {
+    $response['user'] = (object)[];
+    $response['error'] = "402";
+    $response['message'] = "Veuillez fournir l'identifiant et le mot de passe.";
 }
-} 
 
 echo json_encode($response);
 ?>
+
