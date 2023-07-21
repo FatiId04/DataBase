@@ -1,35 +1,35 @@
 <?php
 require "connection.php";
 
-$identifiant= $_GET['identifiant'];
+$identifiant = $_GET['identifiant'];
 $password = $_GET['password'];
 
-$mysqli_query = "SELECT * FROM users where identifiant='$identifiant' ";
+if (isset($_GET['identifiant']) ) {
+    $mysqli_query = "SELECT * FROM users WHERE identifiant=? AND password=?";
+    $stmt = $conn->prepare($mysqli_query);
+    $stmt->bind_param("ss", $identifiant, $password);
+    if (isset($_GET['identifiant']) && isset($_GET['password'])) {
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
 
-$result = mysqli_query($conn,$mysqli_query);
-
-if(mysqli_num_rows($result)>0){
-	$mysqli_query = "SELECT * FROM users where identifiant='$identifiant' and  password='$password ' ";
-	$resultant = mysqli_query($conn,$mysqli_query);
-	
-	if(mysqli_num_rows($resultant)>0){
-		while ($row=$resultant->fetch_assoc()){
-			$response['user']=$row;
-		}
-		$response['error']="200";
-		$response['message']="Bienvenue";
-	}else{
-		$response['user']=(object)[];
-		$response['error']="400";
-		$response['message']="Mot de passe erroné";
-		
-	}
-
-}else{
-    $response['user']=(object)[];
-    $response['error']="401";
-    $response['message']="utilisateur introuvable";
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $response['user'] = $row;
+            }
+            $response['error'] = "200";
+            $response['message'] = "Bienvenue";
+        } else {
+            $response['user'] = (object)[];
+            $response['error'] = "400";
+            $response['message'] = "Mot de passe erroné";
+        }
+    } else {
+        $response['user'] = (object)[];
+        $response['error'] = "401";
+        $response['message'] = "utilisateur introuvable";
+    }
 }
+} 
 
-echo json_encode($response)
+echo json_encode($response);
 ?>
